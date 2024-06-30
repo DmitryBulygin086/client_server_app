@@ -85,15 +85,15 @@ std::string getCurrentTime() {
 };
 
 int main(int argc, char const *argv[]) {
-    if (argc != 4) {
+    if (argc != 5) {
         std::cerr << "Использование: " << argv[0] << " <client_name> <server_ip> <server_port> <interval>" << std::endl;
         return 1;
     }
 
     std::string client_name = argv[1];
-    std::string server_ip = "127.0.0.1"; // Сервер запушен на том же устройстве, что и клиент
-    int server_port = std::stoi(argv[2]);
-    int interval = std::stoi(argv[3]);
+    std::string server_ip = argv[2]; // 127.0.0.1 если сервер запущен на том же устройстве
+    int server_port = std::stoi(argv[3]);
+    int interval = std::stoi(argv[4]);
 
     TCPClient client(client_name, server_ip, server_port, interval);
     client.start();
