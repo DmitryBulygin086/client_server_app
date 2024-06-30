@@ -13,7 +13,14 @@ std::mutex log_mutex;
 
 class TCPServer {
 public:
-    TCPServer(int port) : port(port) {}
+    /**
+ * @brief Конструктор класса TCPServer.
+ *
+ * Инициализирует новый экземпляр TCPServer с указанным портом.
+ *
+ * @param port Номер порта, на котором будет прослушиваться сервер.
+ */
+TCPServer(int port) : port(port) {}
 
     void start() {
         int server_fd; // Сокет для сервера
@@ -66,23 +73,40 @@ public:
 private:
     int port;
 
-    void handleClient(int client_socket) {
-        char buffer[1024] = {0};
-        int valread = read(client_socket, buffer, 1024);
+    /**
+ * @brief Обрабатывает клиентский сокет и получает сообщение от клиента.
+ *
+ * Этот метод читает данные из клиентского сокета, создает из них сообщение,
+ * и затем вызывает метод logMessage для записи сообщения в журнал.
+ *
+ * @param client_socket Сокет, через который сервер получает данные от клиента.
+ */
+void handleClient(int client_socket) {
+    char buffer[1024] = {0};  // Буфер для хранения полученных данных от клиента.
+    int valread = read(client_socket, buffer, 1024);  // Чтение данных из сокета.
 
-        if (valread > 0) {
-            std::string message(buffer, valread);
-            logMessage(message);
-        }
-
-        close(client_socket);
+    if (valread > 0) {  // Если данные были прочитаны успешно.
+        std::string message(buffer, valread);  // Создание сообщения из полученных данных.
+        logMessage(message);  // Запись сообщения в журнал.
     }
 
-    void logMessage(const std::string &message) {
-        std::lock_guard<std::mutex> guard(log_mutex);
-        std::ofstream log_file("log.txt", std::ios_base::app);
-        log_file << message << std::endl;
-    }
+    close(client_socket);  // Закрытие клиентского сокета.
+}
+
+    /**
+ * @brief Записывает сообщение в журнал.
+ *
+ * Этот метод открывает файл журнала, блокирует mutex для предотвращения конфликта 
+ * между потоками, записывает сообщение в конец файла и закрывает файл.
+ *
+ * @param message Сообщение, которое необходимо записать в журнал.
+ */
+void logMessage(const std::string &message) {
+    std::lock_guard<std::mutex> guard(log_mutex);  // Блокировка mutex'а для предотвращения конфликта между потоками.
+    std::ofstream log_file("log.txt", std::ios_base::app);  // Открытие файла журнала в режиме добавления.
+    log_file << message << std::endl;  // Запись сообщения в конец файла.
+    log_file.close();  // Закрытие файла журнала.
+}
 };
 
 int main(int argc, char const *argv[]) {
